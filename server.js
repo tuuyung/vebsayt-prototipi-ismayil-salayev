@@ -1,26 +1,23 @@
-// bu hissede server ucun lazim olan modullar yuklenir
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const helmet = require('helmet');
 require('dotenv').config();
 
-// bu hissede express tetbiqi yaradilir
 const app = express();
+app.use(helmet());
 
-// bu deyiskenler serverin esas ayarlarini saxlayir
 const port = Number.parseInt(process.env.PORT, 10) || 3000;
 const appHost = process.env.APP_HOST || '127.0.0.1';
 const bcryptSaltRounds = Number.parseInt(process.env.BCRYPT_SALT_ROUNDS, 10) || 10;
 
-// bu hissede gelen sorgular ucun ortaq middlewareler qosulur
 app.use(cors());
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 app.set('trust proxy', 1);
 
-// bu obyekt postgresql bazasi ile baglantini idare edir
 const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
@@ -29,22 +26,18 @@ const pool = new Pool({
     port: Number.parseInt(process.env.DB_PORT, 10)
 });
 
-// bu funksiya emaili eyni formaya salir
 function normalizeEmail(email) {
     return email.trim().toLowerCase();
 }
 
-// bu funksiya sifrenin hash formatinda olub olmadigini yoxlayir
 function isBcryptHash(value) {
     return typeof value === 'string' && /^\$2[aby]\$\d{2}\$/.test(value);
 }
 
-// bu hissede baza baglantisinin acildigi yoxlanilir
 pool.connect()
-    .then(() => console.log('PostgreSQL bazasına uğurla qoşuldu'))
-    .catch(err => console.error('Bağlantı xətası:', err.stack));
+    .then(() => console.log('✅ PostgreSQL bazasına uğurla qoşuldu'))
+    .catch(err => console.error('❌ Bağlantı xətası:', err.stack));
 
-// bu funksiya yeni istifadecini qeydiyyata alir
 app.post('/api/signup', async (req, res) => {
     const { e_mail, ad = null, soyad = null, ixtisas = null, sifre } = req.body;
 
@@ -76,7 +69,6 @@ app.post('/api/signup', async (req, res) => {
     }
 });
 
-// bu funksiya istifadecinin giris melumatlarini yoxlayir
 app.post('/api/login', async (req, res) => {
     const { e_mail, sifre } = req.body;
 
@@ -100,6 +92,10 @@ app.post('/api/login', async (req, res) => {
             passwordMatches = await bcrypt.compare(sifre, user.sifre);
         } else if (user.sifre === sifre) {
             passwordMatches = true;
+
+            // Köhnə plain-text parolları uğurlu girişdən sonra hash formatına yüksəlt.
+            const upgradedPassword = await bcrypt.hash(sifre, bcryptSaltRounds);
+            await pool.query('UPDATE public.login SET sifre = $1 WHERE id = $2', [upgradedPassword, user.id]);
         }
 
         if (!passwordMatches) {
@@ -124,7 +120,6 @@ app.post('/api/login', async (req, res) => {
 });
 
 
-// bu hissede server gelen sorulari dinlemeye baslayir
 app.listen(port, appHost, () => {
   console.log(`Backend http://${appHost}:${port} adresində işləyir...`);
 });
