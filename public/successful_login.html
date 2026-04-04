@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- bu hissede sehifenin texniki basligi yer alir -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="University Forum - Successful Login">
+    <title>UniForum - Welcome</title>
+    <!-- bu hissede xarici font elaqeleri qosulur -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- bu hissede ana stil fayli qosulur -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<!-- bu hissede istifadecinin gorduyu interfeys baslayir -->
+<body>
+    <!-- bu element arxa fon hisseciklerini saxlayir -->
+    <div class="bg-particles" id="bgParticles"></div>
+
+    <!-- bu element ugurlu giris sehifesinin esas konteyneridir -->
+    <div class="login-container">
+        <div class="form-panel">
+            <div class="form-wrapper text-center">
+                <!-- bu hissede ugurlu giris ikonu gorunur -->
+                <div class="success-icon-box">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+
+                <!-- bu hissede qarsilama metni gorunur -->
+                <div class="form-header">
+                    <h2 id="welcomeMsg">Xoş gəlmisiniz!</h2>
+                    <p id="subMsg">Hesabınıza uğurla daxil oldunuz.</p>
+                </div>
+
+                <!-- bu hissede daxil olan istifadecinin melumatlari yazilir -->
+                <div id="userDetails"
+                    style="margin-bottom: 32px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid var(--border);">
+                    <p style="margin-bottom: 8px; color: var(--text-muted); font-size: 0.9rem;">Daxil olan istifadəçi:
+                    </p>
+                    <strong id="userDisplayName"
+                        style="display: block; font-size: 1.1rem; color: var(--primary-light);">Yüklənir...</strong>
+                    <span id="userEmail" style="font-size: 0.85rem; color: var(--text-dim);">...</span>
+                </div>
+
+                <!-- bu element cixis etmek ucun kecid verir -->
+                <a href="index.html" class="btn-login" style="text-decoration: none;">
+                    <span class="btn-text">Çıxış et</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- bu hissede ugurlu giris sehifesinin daxili skripti yer alir -->
+    <script>
+        // bu funksiya sehife acilanda istifadeci melumatlarini gosterir
+        document.addEventListener('DOMContentLoaded', () => {
+            const userData = sessionStorage.getItem('uni_forum_user');
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    document.getElementById('userDisplayName').textContent = `${user.ad} ${user.soyad}`;
+                    document.getElementById('userEmail').textContent = user.e_mail;
+                    document.getElementById('welcomeMsg').textContent = `Xoş gəlmisiniz, ${user.ad}!`;
+                } catch (e) {
+                    console.error('User data parse error', e);
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        // bu funksiya cixis zamani sessiya melumatini silir
+        document.querySelector('.btn-login').addEventListener('click', () => {
+            sessionStorage.removeItem('uni_forum_user');
+        });
+    </script>
+</body>
+</html>

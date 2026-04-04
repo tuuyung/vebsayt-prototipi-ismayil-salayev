@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- bu hissede sehifenin texniki basligi yer alir -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="University Forum - Create your account and join the community.">
+    <title>UniForum - Sign Up</title>
+    <!-- bu hissede xarici font elaqeleri qosulur -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- bu hissede ana stil fayli qosulur -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<!-- bu hissede istifadecinin gorduyu interfeys baslayir -->
+<body>
+    <!-- bu element arxa fon hisseciklerini saxlayir -->
+    <div class="bg-particles" id="bgParticles"></div>
+
+    <!-- bu element qeydiyyat sehifesinin esas konteyneridir -->
+    <div class="login-container">
+        <div class="form-panel">
+            <div class="form-wrapper" id="signupWrapper">
+                <!-- bu hissede qeydiyyat sehifesinin basligi gorunur -->
+                <div class="form-header">
+                    <h2>Create Account</h2>
+                    <p>Join the university forum</p>
+                </div>
+
+                <!-- bu element qeydiyyat formasini saxlayir -->
+                <form id="signupForm" novalidate>
+                    <!-- bu hissede ad ve soyad xanalari yer alir -->
+                    <div class="name-row">
+                        <div class="input-group" id="regAdGroup">
+                            <label for="regAd">Ad (Name)</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="regAd" placeholder="John" required>
+                            </div>
+                            <span class="error-msg" id="regAdError"></span>
+                        </div>
+                        <div class="input-group" id="regSoyadGroup">
+                            <label for="regSoyad">Soyad (Surname)</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="regSoyad" placeholder="Doe" required>
+                            </div>
+                            <span class="error-msg" id="regSoyadError"></span>
+                        </div>
+                    </div>
+
+                    <!-- bu hissede ixtisas daxil etmek ucun xana var -->
+                    <div class="input-group" id="regIxtisasGroup">
+                        <label for="regIxtisas">İxtisas (Specialty)</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="regIxtisas" placeholder="Computer Science" required>
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                                <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                            </svg>
+                        </div>
+                        <span class="error-msg" id="regIxtisasError"></span>
+                    </div>
+
+                    <!-- bu hissede email daxil etmek ucun xana var -->
+                    <div class="input-group" id="regEmailGroup">
+                        <label for="regEmail">University Email</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="regEmail" placeholder="you@university.edu" autocomplete="email"
+                                required>
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="4" width="20" height="16" rx="3" />
+                                <path d="M22 7L13.03 12.7a1.94 1.94 0 01-2.06 0L2 7" />
+                            </svg>
+                        </div>
+                        <span class="error-msg" id="regEmailError"></span>
+                    </div>
+
+                    <!-- bu hissede sifre daxil etmek ucun xana var -->
+                    <div class="input-group" id="regPasswordGroup">
+                        <label for="regPassword">Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="regPassword" placeholder="Create a password"
+                                autocomplete="new-password" required>
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" />
+                                <path d="M7 11V7a5 5 0 0110 0v4" />
+                            </svg>
+                        </div>
+                        <span class="error-msg" id="regPasswordError"></span>
+                    </div>
+
+                    <!-- bu element formu gonderen duymedir -->
+                    <button type="submit" class="btn-login" id="signupBtn">
+                        <span class="btn-text">Sign Up</span>
+                        <div class="btn-loader" style="display:none">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </button>
+                </form>
+
+                <!-- bu hissede giris sehifesine geri kecid verilir -->
+                <p class="signup-prompt">
+                    Already have an account? <a href="index.html" id="showLogin">Sign in</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- bu hissede qeydiyyat sehifesinin skripti qosulur -->
+    <script src="signup_script.js"></script>
+</body>
+
+</html>

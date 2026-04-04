@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- bu hissede sehifenin texniki basligi yer alir -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="University Forum - Connect, discuss, and collaborate with fellow students.">
+    <title>UniForum - Login</title>
+    <!-- bu hissede xarici font elaqeleri qosulur -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- bu hissede ana stil fayli qosulur -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<!-- bu hissede istifadecinin gorduyu interfeys baslayir -->
+<body>
+    <!-- bu element arxa fon hisseciklerini saxlayir -->
+    <div class="bg-particles" id="bgParticles"></div>
+
+    <!-- bu element login sehifesinin esas konteyneridir -->
+    <div class="login-container">
+        <div class="form-panel">
+            <div class="form-wrapper" id="loginWrapper">
+                <!-- bu hissede login sehifesinin basligi gorunur -->
+                <div class="form-header">
+                    <h2>Welcome back</h2>
+                    <p>Sign in to your university forum account</p><br>
+                </div>
+
+                <!-- bu element giris formasini saxlayir -->
+                <form id="loginForm" novalidate>
+                    <!-- bu hissede email daxil etmek ucun xana var -->
+                    <div class="input-group" id="emailGroup">
+                        <label for="email">University Email</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="email" placeholder="you@university.edu" autocomplete="email"
+                                required>
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="4" width="20" height="16" rx="3" />
+                                <path d="M22 7L13.03 12.7a1.94 1.94 0 01-2.06 0L2 7" />
+                            </svg>
+                        </div>
+                        <span class="error-msg" id="emailError"></span>
+                    </div>
+
+                    <!-- bu hissede sifre daxil etmek ucun xana var -->
+                    <div class="input-group" id="passwordGroup">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="password" placeholder="Enter your password"
+                                autocomplete="current-password" required>
+                            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" />
+                                <path d="M7 11V7a5 5 0 0110 0v4" />
+                            </svg>
+                            <button type="button" class="toggle-password" id="togglePassword">
+                                <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                                <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" style="display:none">
+                                    <path
+                                        d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" />
+                                    <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" />
+                                    <line x1="1" y1="1" x2="23" y2="23" />
+                                </svg>
+                            </button>
+                        </div>
+                        <span class="error-msg" id="passwordError"></span>
+                    </div>
+
+                    <!-- bu hissede elave secimler ve kecid var -->
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="rememberMe">
+                            <span class="custom-checkbox"></span>
+                            Remember me
+                        </label>
+                        <a href="#" class="forgot-link">Forgot password?</a>
+                    </div>
+
+                    <!-- bu element formu gonderen duymedir -->
+                    <button type="submit" class="btn-login" id="loginBtn">
+                        <span class="btn-text">Sign In</span>
+                        <div class="btn-loader" style="display:none">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </button>
+                </form>
+
+                <!-- bu hissede alternativ giris bolmesi ayrilir -->
+                <div class="divider">
+                    <span>or continue with</span>
+                </div>
+
+                <!-- bu hissede sosial giris duymeleri yer alir -->
+                <div class="social-login">
+                    <button type="button" class="btn-social" aria-label="Sign in with Google">
+                        <svg width="20" height="20" viewBox="0 0 24 24">
+                            <path
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                                fill="#4285F4" />
+                            <path
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                fill="#34A853" />
+                            <path
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                fill="#FBBC05" />
+                            <path
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                fill="#EA4335" />
+                        </svg>
+                        Google
+                    </button>
+                    <button type="button" class="btn-social" aria-label="Sign in with Microsoft">
+                        <svg width="20" height="20" viewBox="0 0 24 24">
+                            <rect x="1" y="1" width="10" height="10" fill="#F25022" />
+                            <rect x="13" y="1" width="10" height="10" fill="#7FBA00" />
+                            <rect x="1" y="13" width="10" height="10" fill="#00A4EF" />
+                            <rect x="13" y="13" width="10" height="10" fill="#FFB900" />
+                        </svg>
+                        Microsoft
+                    </button>
+                </div>
+
+                <!-- bu hissede qeydiyyat sehifesine kecid verilir -->
+                <p class="signup-prompt">
+                    Don't have an account? <a href="signup.html">Sign up</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- bu hissede login sehifesinin skripti qosulur -->
+    <script src="script.js"></script>
+</body>
+
+</html>
