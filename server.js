@@ -1,5 +1,6 @@
 // bu hissede server ucun lazim olan modullar yuklenir
 const express = require('express');
+const { isIP } = require('node:net');
 const { Pool } = require('pg');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
@@ -41,46 +42,91 @@ function isBcryptHash(value) {
     return typeof value === 'string' && /^\$2[aby]\$\d{2}\$/.test(value);
 }
 
+// bu funksiya sorgudan gelen ip unvanini uygun formata salib qaytarir
+function getClientIpAddress(req) {
+    const forwardedForHeader = req.headers['x-forwarded-for'];
+    const rawIpAddress = typeof forwardedForHeader === 'string' && forwardedForHeader.trim() !== ''
+        ? forwardedForHeader.split(',')[0].trim()
+        : req.ip || req.socket?.remoteAddress || '';
+
+    if (typeof rawIpAddress !== 'string' || rawIpAddress.trim() === '') {
+        return null;
+    }
+
+    const normalizedIpAddress = rawIpAddress.replace(/^::ffff:/, '');
+    return isIP(normalizedIpAddress) ? normalizedIpAddress : null;
+}
+
+// bu funksiya activity cedveline login ve qeydiyyat loglarini yazir
+async function insertActivityLog(db, loginId, actionType, ipAddress) {
+    const insertLogQuery = `
+        INSERT INTO public.activity (login_id, action_type, logged_at_time, logged_at_date, ip_address)
+        VALUES ($1, $2, CURRENT_TIME, CURRENT_DATE, $3);
+    `;
+
+    await db.query(insertLogQuery, [loginId, actionType, ipAddress]);
+}
+
 // bu hissede baza baglantisinin acildigi yoxlanilir
-pool.connect()
+pool.query('SELECT 1')
     .then(() => console.log('PostgreSQL bazasına uğurla qoşuldu'))
     .catch(err => console.error('Bağlantı xətası:', err.stack));
 
 // bu funksiya yeni istifadecini qeydiyyata alir
 app.post('/api/signup', async (req, res) => {
     const { e_mail, ad = null, soyad = null, ixtisas = null, sifre } = req.body;
+    const normalizedEmail = normalizeEmail(e_mail || '');
+    const clientIpAddress = getClientIpAddress(req);
 
     if (!e_mail || !sifre) {
         return res.status(400).json({ error: 'Email və şifrə mütləqdir!' });
     }
 
+    let client;
     try {
         const hashedPassword = await bcrypt.hash(sifre, bcryptSaltRounds);
+        client = await pool.connect();
+        await client.query('BEGIN');
+
         const insertQuery = `
             INSERT INTO public.login (e_mail, ad, soyad, ixtisas, sifre)
             VALUES ($1, $2, $3, $4, $5)
             RETURNING id;
         `;
-        const values = [normalizeEmail(e_mail), ad, soyad, ixtisas, hashedPassword];
-        const result = await pool.query(insertQuery, values);
+        const values = [normalizedEmail, ad, soyad, ixtisas, hashedPassword];
+        const result = await client.query(insertQuery, values);
+        const userId = result.rows[0].id;
+
+        await insertActivityLog(client, userId, 'signup', clientIpAddress);
+        await client.query('COMMIT');
 
         res.status(201).json({
             success: true,
             message: 'Məlumat bazaya uğurla əlavə edildi',
-            userId: result.rows[0].id
+            userId
         });
     } catch (err) {
+        if (client) {
+            await client.query('ROLLBACK').catch(() => null);
+        }
+
         console.error('Bazaya yazılma xətası baş verdi:', err.stack);
         if (err.code === '23505') {
             return res.status(400).json({ success: false, error: 'Bu email artıq qeydiyyatdan keçib' });
         }
         res.status(500).json({ success: false, error: 'Daxili server xətası baş verdi' });
+    } finally {
+        if (client) {
+            client.release();
+        }
     }
 });
 
 // bu funksiya istifadecinin giris melumatlarini yoxlayir
 app.post('/api/login', async (req, res) => {
     const { e_mail, sifre } = req.body;
+    const normalizedEmail = normalizeEmail(e_mail || '');
+    const clientIpAddress = getClientIpAddress(req);
 
     if (!e_mail || !sifre) {
         return res.status(400).json({ success: false, error: 'Email və şifrə mütləqdir!' });
@@ -88,7 +134,7 @@ app.post('/api/login', async (req, res) => {
 
     try {
         const checkQuery = `SELECT id, ad, soyad, ixtisas, sifre FROM public.login WHERE e_mail = $1`;
-        const result = await pool.query(checkQuery, [normalizeEmail(e_mail)]);
+        const result = await pool.query(checkQuery, [normalizedEmail]);
 
         if (result.rows.length === 0) {
             res.status(401).json({ success: false, error: 'E-mail və ya şifrə səhvdir' });
@@ -108,6 +154,8 @@ app.post('/api/login', async (req, res) => {
             res.status(401).json({ success: false, error: 'E-mail və ya şifrə səhvdir' });
             return;
         }
+
+        await insertActivityLog(pool, user.id, 'login', clientIpAddress);
 
         res.status(200).json({
             success: true,
