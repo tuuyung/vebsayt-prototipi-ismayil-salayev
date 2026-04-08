@@ -42,19 +42,64 @@ function isBcryptHash(value) {
     return typeof value === 'string' && /^\$2[aby]\$\d{2}\$/.test(value);
 }
 
-// bu funksiya sorgudan gelen ip unvanini uygun formata salib qaytarir
-function getClientIpAddress(req) {
-    const forwardedForHeader = req.headers['x-forwarded-for'];
-    const rawIpAddress = typeof forwardedForHeader === 'string' && forwardedForHeader.trim() !== ''
-        ? forwardedForHeader.split(',')[0].trim()
-        : req.ip || req.socket?.remoteAddress || '';
-
+// bu funksiya ip unvanini standart gorunuse salib qaytarir
+function normalizeIpAddress(rawIpAddress) {
     if (typeof rawIpAddress !== 'string' || rawIpAddress.trim() === '') {
         return null;
     }
 
-    const normalizedIpAddress = rawIpAddress.replace(/^::ffff:/, '');
+    const normalizedIpAddress = rawIpAddress.trim().replace(/^::ffff:/, '');
     return isIP(normalizedIpAddress) ? normalizedIpAddress : null;
+}
+
+// bu funksiya ip unvaninin private ve ya lokal olub olmadigini yoxlayir
+function isPrivateIpAddress(ipAddress) {
+    if (!ipAddress) {
+        return false;
+    }
+
+    if (ipAddress === '127.0.0.1' || ipAddress === '::1') {
+        return true;
+    }
+
+    if (ipAddress.startsWith('10.') || ipAddress.startsWith('192.168.')) {
+        return true;
+    }
+
+    if (/^172\.(1[6-9]|2\d|3[0-1])\./.test(ipAddress)) {
+        return true;
+    }
+
+    return ipAddress.startsWith('fc')
+        || ipAddress.startsWith('fd')
+        || ipAddress.startsWith('fe80:');
+}
+
+// bu funksiya sorgudan gelen public ip unvanini tapib qaytarir
+function getClientIpAddress(req) {
+    const headerCandidates = [
+        req.headers['cf-connecting-ip'],
+        req.headers['x-real-ip'],
+        req.headers['x-forwarded-for'],
+        req.ip,
+        req.socket?.remoteAddress
+    ];
+
+    const parsedIpAddresses = headerCandidates
+        .flatMap(value => typeof value === 'string' ? value.split(',') : [])
+        .map(value => normalizeIpAddress(value))
+        .filter(Boolean);
+
+    const publicIpAddress = parsedIpAddresses.find(ipAddress => !isPrivateIpAddress(ipAddress));
+    if (publicIpAddress) {
+        return publicIpAddress;
+    }
+
+    if (parsedIpAddresses.length === 0) {
+        return null;
+    }
+
+    return parsedIpAddresses[0];
 }
 
 // bu funksiya activity cedveline login ve qeydiyyat loglarini yazir
