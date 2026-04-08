@@ -1,6 +1,5 @@
 // bu hissede server ucun lazim olan modullar yuklenir
 const express = require('express');
-const { isIP } = require('node:net');
 const { Pool } = require('pg');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
@@ -42,74 +41,14 @@ function isBcryptHash(value) {
     return typeof value === 'string' && /^\$2[aby]\$\d{2}\$/.test(value);
 }
 
-// bu funksiya ip unvanini standart gorunuse salib qaytarir
-function normalizeIpAddress(rawIpAddress) {
-    if (typeof rawIpAddress !== 'string' || rawIpAddress.trim() === '') {
-        return null;
-    }
-
-    const normalizedIpAddress = rawIpAddress.trim().replace(/^::ffff:/, '');
-    return isIP(normalizedIpAddress) ? normalizedIpAddress : null;
-}
-
-// bu funksiya ip unvaninin private ve ya lokal olub olmadigini yoxlayir
-function isPrivateIpAddress(ipAddress) {
-    if (!ipAddress) {
-        return false;
-    }
-
-    if (ipAddress === '127.0.0.1' || ipAddress === '::1') {
-        return true;
-    }
-
-    if (ipAddress.startsWith('10.') || ipAddress.startsWith('192.168.')) {
-        return true;
-    }
-
-    if (/^172\.(1[6-9]|2\d|3[0-1])\./.test(ipAddress)) {
-        return true;
-    }
-
-    return ipAddress.startsWith('fc')
-        || ipAddress.startsWith('fd')
-        || ipAddress.startsWith('fe80:');
-}
-
-// bu funksiya sorgudan gelen public ip unvanini tapib qaytarir
-function getClientIpAddress(req) {
-    const headerCandidates = [
-        req.headers['cf-connecting-ip'],
-        req.headers['x-real-ip'],
-        req.headers['x-forwarded-for'],
-        req.ip,
-        req.socket?.remoteAddress
-    ];
-
-    const parsedIpAddresses = headerCandidates
-        .flatMap(value => typeof value === 'string' ? value.split(',') : [])
-        .map(value => normalizeIpAddress(value))
-        .filter(Boolean);
-
-    const publicIpAddress = parsedIpAddresses.find(ipAddress => !isPrivateIpAddress(ipAddress));
-    if (publicIpAddress) {
-        return publicIpAddress;
-    }
-
-    if (parsedIpAddresses.length === 0) {
-        return null;
-    }
-
-    return parsedIpAddresses[0];
-}
-
 // bu funksiya activity cedveline login ve qeydiyyat loglarini yazir
-async function insertActivityLog(db, loginId, actionType, ipAddress) {
+async function insertActivityLog(db, loginId, actionType) {
     const insertLogQuery = `
         INSERT INTO public.activity (login_id, action_type, logged_at_time, logged_at_date, ip_address)
-        VALUES ($1, $2, CURRENT_TIME, CURRENT_DATE, $3);
+        VALUES ($1, $2, CURRENT_TIME, CURRENT_DATE, NULL);
     `;
 
-    await db.query(insertLogQuery, [loginId, actionType, ipAddress]);
+    await db.query(insertLogQuery, [loginId, actionType]);
 }
 
 // bu hissede baza baglantisinin acildigi yoxlanilir
@@ -121,7 +60,6 @@ pool.query('SELECT 1')
 app.post('/api/signup', async (req, res) => {
     const { e_mail, ad = null, soyad = null, ixtisas = null, sifre } = req.body;
     const normalizedEmail = normalizeEmail(e_mail || '');
-    const clientIpAddress = getClientIpAddress(req);
 
     if (!e_mail || !sifre) {
         return res.status(400).json({ error: 'Email və şifrə mütləqdir!' });
@@ -142,7 +80,7 @@ app.post('/api/signup', async (req, res) => {
         const result = await client.query(insertQuery, values);
         const userId = result.rows[0].id;
 
-        await insertActivityLog(client, userId, 'signup', clientIpAddress);
+        await insertActivityLog(client, userId, 'signup');
         await client.query('COMMIT');
 
         res.status(201).json({
@@ -171,7 +109,6 @@ app.post('/api/signup', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     const { e_mail, sifre } = req.body;
     const normalizedEmail = normalizeEmail(e_mail || '');
-    const clientIpAddress = getClientIpAddress(req);
 
     if (!e_mail || !sifre) {
         return res.status(400).json({ success: false, error: 'Email və şifrə mütləqdir!' });
@@ -200,7 +137,7 @@ app.post('/api/login', async (req, res) => {
             return;
         }
 
-        await insertActivityLog(pool, user.id, 'login', clientIpAddress);
+        await insertActivityLog(pool, user.id, 'login');
 
         res.status(200).json({
             success: true,
