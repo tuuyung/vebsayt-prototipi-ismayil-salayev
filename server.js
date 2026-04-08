@@ -44,7 +44,7 @@ function isBcryptHash(value) {
 // bu funksiya activity cedveline login ve qeydiyyat loglarini yazir
 async function insertActivityLog(db, loginId, actionType) {
     const insertLogQuery = `
-        INSERT INTO public.activity (login_id, action_type, logged_at_time, logged_at_date, ip_address)
+        INSERT INTO public.activity (login_id, action_type, logged_at_time, logged_at_date)
         VALUES ($1, $2, CURRENT_TIME, CURRENT_DATE, NULL);
     `;
 
