@@ -45,7 +45,7 @@ function isBcryptHash(value) {
 async function insertActivityLog(db, loginId, actionType) {
     const insertLogQuery = `
         INSERT INTO public.activity (login_id, action_type, logged_at_time, logged_at_date)
-        VALUES ($1, $2, CURRENT_TIME, CURRENT_DATE, NULL);
+        VALUES ($1, $2, CURRENT_TIME, CURRENT_DATE);
     `;
 
     await db.query(insertLogQuery, [loginId, actionType]);
